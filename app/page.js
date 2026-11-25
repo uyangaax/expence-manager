@@ -1,69 +1,122 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
 
 export default function Home() {
+  const [name, setName] = useState("");
+  const [amount, setAmount] = useState("");
+  const [expenses, setExpenses] = useState([]);
+
+  // Нийт зардлыг бодох
+  const total = expenses.reduce((sum, expense) => {
+    return sum + expense.amount;
+  }, 0);
+
+  const isFormValid = name.trim() !== "" && Number(amount) > 0;
+
+  // Зардал нэмэх
+  const addExpence = (event) => {
+    event.preventDefault();
+
+    if (!isFormValid) {
+      return;
+    }
+
+    const newExpence = {
+      id: Date.now(),
+      name: name.trim(),
+      amount: Number(amount),
+    };
+
+    setExpenses([...expenses, newExpence]);
+
+    setName("");
+    setAmount("");
+  };
+
+  // Зардал устгах
+  const deleteExpence = (id) => {
+    setExpenses(expenses.filter((expense) => expense.id !== id));
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="max-w-5xl mx-auto mt-10 p-8 bg-white shadow-lg rounded-[40px]">
+      <h1 className="text-4xl text-slate-900 font-bold mb-10">
+        💸 Зардлын тэмдэглэл
+      </h1>
+
+      {/* Нийт зардал */}
+      <div className="bg-slate-900 rounded-[30px] p-10 mb-10">
+        <p className="text-slate-400 text-2xl mb-2">НИЙТ</p>
+
+        <h1 className="text-white text-6xl font-bold">
+          {total.toLocaleString()} ₮
+        </h1>
+      </div>
+
+      {/* Зардал нэмэх form */}
+      <form onSubmit={addExpence} className="flex flex-col gap-5">
+        <input
+          type="text"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Юунд зарцуулсан бэ?"
+          className="border-2 border-slate-300 p-5 rounded-3xl text-black text-2xl outline-none focus:border-emerald-500"
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.js
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+
+        <input
+          type="number"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
+          placeholder="Дүн (₮)"
+          className="border-2 border-slate-300 p-5 rounded-3xl text-black text-2xl outline-none focus:border-emerald-500"
+        />
+
+        <button
+          type="submit"
+          disabled={!isFormValid}
+          className="bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 text-white text-2xl font-bold p-5 rounded-3xl"
+        >
+          Нэмэх
+        </button>
+      </form>
+
+      {/* Зардлын жагсаалт */}
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold text-slate-900 mb-5">
+          Зардлын жагсаалт
+        </h2>
+
+        {expenses.map((expense) => (
+          <div
+            key={expense.id}
+            className="flex justify-between items-center border-b p-4"
+          >
+            <div>
+              <p className="text-xl font-semibold text-slate-800">
+                {expense.name}
+              </p>
+
+              <p className="text-emerald-600 font-bold">
+                {expense.amount.toLocaleString()} ₮
+              </p>
+            </div>
+
+            <button
+              onClick={() => deleteExpence(expense.id)}
+              className="text-red-500 font-bold"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              Устгах
+            </button>
+          </div>
+        ))}
+
+        {expenses.length === 0 && (
+          <p className="text-slate-400 text-center p-5">
+            Одоогоор зардал бүртгээгүй байна.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+        )}
+      </div>
     </div>
   );
 }
